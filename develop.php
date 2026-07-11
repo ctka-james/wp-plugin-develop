@@ -18,27 +18,107 @@ if (!defined('DEVELOP_PLUGIN_VERSION')) {
     define('DEVELOP_PLUGIN_VERSION', '0.1.0');
 }
 
-// 這個函式會在 WordPress 管理後台建立一個選單項目。
+// 定義選項名稱，讓後續儲存與讀取設定時可以重複使用。
+if (!defined('DEVELOP_PLUGIN_OPTION_NAME')) {
+    define('DEVELOP_PLUGIN_OPTION_NAME', 'develop_plugin_message');
+}
+
+// 這個 hook 會在 WordPress 管理後台建立選單項目。
 add_action('admin_menu', 'develop_register_menu');
+
+// 這個 hook 會在管理頁面初始化時註冊設定欄位。
+add_action('admin_init', 'develop_register_settings');
 
 function develop_register_menu() {
     add_menu_page(
-        'Develop Plugin',      // 頁面標題
-        'Develop Plugin',      // 選單名稱
-        'manage_options',      // 需要的權限
-        'develop-plugin',     // 選單 slug
-        'develop_render_admin_page', // 點擊後要顯示的函式
-        'dashicons-smiley',   // 選單圖示
-        20                    // 選單順序
+        'Develop Plugin',
+        'Develop 外掛學習',
+        'manage_options',
+        'develop-plugin',
+        'develop_render_admin_page',
+        'dashicons-welcome-learn-more',
+        20
     );
+
+    add_submenu_page(
+        'develop-plugin',
+        'Develop Plugin 設定',
+        '設定', 
+        'manage_options',
+        'develop-plugin-settings',
+        'develop_render_settings_page'
+    );
+}
+
+function develop_register_settings() {
+    register_setting(
+        'develop_plugin_settings_group',
+        DEVELOP_PLUGIN_OPTION_NAME,
+        array(
+            'type' => 'string',
+            'sanitize_callback' => 'develop_sanitize_message',
+            'default' => '歡迎來到 WordPress Plugin 學習專案',
+        )
+    );
+
+    add_settings_section(
+        'develop_plugin_main_section',
+        '基本設定',
+        'develop_render_settings_section',
+        'develop-plugin-settings'
+    );
+
+    add_settings_field(
+        'develop_plugin_message_field',
+        '顯示訊息',
+        'develop_render_message_field',
+        'develop-plugin-settings',
+        'develop_plugin_main_section'
+    );
+}
+
+function develop_sanitize_message($value) {
+    // 將使用者輸入的內容做基本清理，避免 HTML 或不必要的字元污染。
+    $value = sanitize_text_field($value);
+
+    return $value;
+}
+
+function develop_render_settings_section() {
+    echo '<p>在這裡設定插件要顯示的內容，這是 WordPress Options API 的基本使用方式。</p>';
+}
+
+function develop_render_message_field() {
+    $value = get_option(DEVELOP_PLUGIN_OPTION_NAME, '歡迎來到 WordPress Plugin 學習專案');
+    echo '<input type="text" name="' . esc_attr(DEVELOP_PLUGIN_OPTION_NAME) . '" value="' . esc_attr($value) . '" class="regular-text" />';
 }
 
 // 這個函式負責在管理頁面中輸出內容。
 function develop_render_admin_page() {
+    $message = get_option(DEVELOP_PLUGIN_OPTION_NAME, '歡迎來到 WordPress Plugin 學習專案');
+
     echo '<div class="wrap">';
     echo '<h1>WordPress Plugin 學習範例</h1>';
     echo '<p>這是一個最小可運作的插件，接下來我們會一步一步加入更多功能。</p>';
     echo '<p>目前版本：' . esc_html(DEVELOP_PLUGIN_VERSION) . '</p>';
+    echo '<p>目前儲存的訊息：<strong>' . esc_html($message) . '</strong></p>';
+    echo '</div>';
+}
+
+function develop_render_settings_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    echo '<div class="wrap">';
+    echo '<h1>Develop Plugin 設定</h1>';
+    echo '<form method="post" action="options.php">';
+
+    settings_fields('develop_plugin_settings_group');
+    do_settings_sections('develop-plugin-settings');
+    submit_button('儲存設定');
+
+    echo '</form>';
     echo '</div>';
 }
 
