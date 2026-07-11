@@ -57,7 +57,7 @@ function develop_register_settings() {
         array(
             'type' => 'string',
             'sanitize_callback' => 'develop_sanitize_message',
-            'default' => '歡迎來到 WordPress Plugin 學習專案',
+            'default' => '---歡迎來到 WordPress Plugin 學習專案---',
         )
     );
 
@@ -80,7 +80,7 @@ function develop_register_settings() {
 function develop_sanitize_message($value) {
     // 將使用者輸入的內容做基本清理，避免 HTML 或不必要的字元污染。
     $value = sanitize_text_field($value);
-
+    
     return $value;
 }
 
