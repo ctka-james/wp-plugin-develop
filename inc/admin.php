@@ -9,6 +9,15 @@ if (!defined('ABSPATH')) {
 add_action('admin_menu', 'develop_register_menu');
 add_action('admin_init', 'develop_register_settings');
 add_action('admin_notices', 'develop_admin_notice');
+add_action('admin_enqueue_scripts', 'develop_enqueue_admin_assets');
+
+function develop_enqueue_admin_assets($hook_suffix) {
+    if ($hook_suffix === 'toplevel_page_develop-plugin' || $hook_suffix === 'develop-plugin_page_develop-plugin-settings') {
+        wp_enqueue_style('develop-admin-css', plugin_dir_url(dirname(__FILE__)) . 'assets/css/admin.css', array(), DEVELOP_PLUGIN_VERSION);
+        wp_enqueue_script('jquery');
+        wp_enqueue_script('develop-jquery-example', plugin_dir_url(dirname(__FILE__)) . 'assets/js/jquery-example.js', array('jquery'), DEVELOP_PLUGIN_VERSION, true);
+    }
+}
 
 function develop_register_menu() {
     add_menu_page(
