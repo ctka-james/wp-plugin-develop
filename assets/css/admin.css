@@ -1,0 +1,14 @@
+.develop-plugin-help-text {
+    color: #d8391d;
+    font-weight: 600;
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 10px 12px;
+    border-radius: 4px;
+}
+
+.develop-plugin-help-text.is-highlighted {
+    color: #065f46;
+    background: #ecfdf5;
+    border-left-color: #10b981;
+}
