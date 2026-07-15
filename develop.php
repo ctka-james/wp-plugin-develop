@@ -41,7 +41,7 @@ require_once DEVELOP_PLUGIN_PATH . 'inc/frontend.php';
  */
 function develop_plugin_activate() {
     // 這裡可以新增資料庫欄位或預設 option。
-    // update_option( 'my_dev_plugin_option', '預設值' );
+    // update_option( 'develop_plugin_option', '預設值' );
 }
 register_activation_hook( __FILE__, 'develop_plugin_activate' );
 
