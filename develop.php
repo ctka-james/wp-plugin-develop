@@ -28,6 +28,7 @@ if (!defined('DEVELOP_PLUGIN_URL')) {
     define('DEVELOP_PLUGIN_URL', plugin_dir_url(__FILE__));
 }
 
+// 定義外掛路徑，方便後續引入檔案。
 if (!defined('DEVELOP_PLUGIN_PATH')) {
     define('DEVELOP_PLUGIN_PATH', plugin_dir_path(__FILE__));
 }
@@ -47,9 +48,10 @@ register_activation_hook( __FILE__, 'develop_plugin_activate' );
 
 /**
  * 停用外掛時執行的函式。
- * 通常用來清理暫存資料或暫時停止功能。
+ * 這裡會清掉外掛相關的設定選項，避免停用後仍保留舊資料。
  */
 function develop_plugin_deactivate() {
-    // 這裡可以清除暫存或暫停排程工作。
+    delete_option( DEVELOP_PLUGIN_OPTION_NAME );
+    delete_option( 'develop_plugin_shortcode_message' );
 }
 register_deactivation_hook( __FILE__, 'develop_plugin_deactivate' );
