@@ -17,7 +17,25 @@ function develop_enqueue_frontend_assets() {
 
 // 顯示前台訊息
 function develop_render_frontend_message($atts = array()) {
-    $message = get_option(DEVELOP_PLUGIN_OPTION_NAME, '歡迎來到 WordPress Plugin 學習專案');
+    $atts = shortcode_atts(
+        array(
+            'message' => '',
+        ),
+        $atts,
+        'develop_message'
+    );
+
+    $message = $atts['message'];
+
+    if ($message === '') {
+        $message = get_option('develop_plugin_shortcode_message', '');
+    }
+
+    if ($message === '') {
+        $message = get_option(DEVELOP_PLUGIN_OPTION_NAME, '歡迎來到 WordPress Plugin 學習專案');
+    }
+
+    $message = sanitize_text_field($message);
 
     return '<p class="develop-plugin-message">' . esc_html($message) . '</p>';
 }

@@ -49,6 +49,16 @@ function develop_register_settings() {
         )
     );
 
+    register_setting(
+        'develop_plugin_settings_group',
+        'develop_plugin_shortcode_message',
+        array(
+            'type' => 'string',
+            'sanitize_callback' => 'develop_sanitize_message',
+            'default' => '這是由短碼顯示的預設內容',
+        )
+    );
+
     add_settings_section(
         'develop_plugin_main_section',
         '基本設定',
@@ -60,6 +70,14 @@ function develop_register_settings() {
         'develop_plugin_message_field',
         '顯示訊息',
         'develop_render_message_field',
+        'develop-plugin-settings',
+        'develop_plugin_main_section'
+    );
+
+    add_settings_field(
+        'develop_plugin_shortcode_message_field',
+        '短碼預設內容',
+        'develop_render_shortcode_message_field',
         'develop-plugin-settings',
         'develop_plugin_main_section'
     );
@@ -144,4 +162,13 @@ function develop_render_settings_page() {
 
     echo '</form>';
     echo '</div>';
+}
+
+// 設定欄位 develop_register_settings() 中的 add_settings_field()
+// 這個函式會在「基本設定」的區塊中新增一個「短碼預設內容」的欄位
+// 使用者可以在該欄位中輸入要顯示的短碼預設內容，並且將該內容儲存到 WordPress 的資料庫中。
+function develop_render_shortcode_message_field() {
+    $value = get_option('develop_plugin_shortcode_message', '這是由短碼顯示的預設內容');
+    echo '<input type="text" name="develop_plugin_shortcode_message" value="' . esc_attr($value) . '" class="regular-text" />';
+    echo '<p class="description">這個內容會作為短碼 [develop_message] 的預設顯示內容。</p>';
 }
