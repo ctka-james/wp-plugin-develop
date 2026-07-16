@@ -28,6 +28,10 @@ function develop_render_frontend_message($atts = array()) {
     $message = $atts['message'];
 
     if ($message === '') {
+        $message = get_option('develop_plugin_shortcode_message', '');
+    }
+
+    if ($message === '') {
         $message = get_option(DEVELOP_PLUGIN_OPTION_NAME, '歡迎來到 WordPress Plugin 學習專案');
     }
 
