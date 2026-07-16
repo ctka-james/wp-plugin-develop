@@ -2,61 +2,87 @@
 
 ## 這個 hook 的用途
 
-`add_action('admin_menu', 'develop_register_menu');` 的作用，是在 WordPress 的管理後台準備建立選單時，執行我們自訂的 `develop_register_menu()` 函式。
+`add_action('admin_menu', 'develop_register_menu');` 會在 WordPress 管理後台建立選單時執行 `develop_register_menu()`。
 
-這表示我們把自己的功能「掛」到 WordPress 的管理選單流程上，讓外掛在適當的時機自動顯示出來。
+在目前的專案中，這段掛載是寫在 [inc/admin.php](../inc/admin.php) 裡，並由 [develop.php](../develop.php) 透過 `require_once` 載入，所以外掛啟動後，管理後台就會依照這個流程建立入口。
+
+## 目前專案結構與位置
+
+這個外掛目前的功能已經拆成不同檔案：
+
+- [develop.php](../develop.php)：外掛主檔案，定義常數並載入管理與前台功能。
+- [inc/admin.php](../inc/admin.php)：負責後台選單、設定頁與管理通知。
+- [inc/frontend.php](../inc/frontend.php)：負責前台顯示與短碼。
+
+因此，`admin_menu` 這個流程現在是由管理後台相關檔案來負責建立，而不是全部集中在主檔案中。
 
 ## 這段程式碼在做什麼
 
-在這個外掛中，`develop_register_menu()` 會做兩件事：
+`develop_register_menu()` 目前會建立兩層管理入口：
 
-1. 建立主選單
-   - 例如「Develop 外掛學習」
-2. 建立子選單
-   - 例如「設定」
+1. 主選單
+   - 名稱為「Develop 外掛學習」
+2. 子選單
+   - 名稱為「設定」
 
-## 作用流程
+這代表外掛會在 WordPress 後台新增一個自己的管理入口，使用者可以從這裡進入外掛頁面。
 
-1. WordPress 啟動管理後台
+## 執行流程
+
+1. WordPress 進入管理後台
 2. 觸發 `admin_menu` 這個 hook
 3. 執行 `develop_register_menu()`
-4. 使用 `add_menu_page()` 與 `add_submenu_page()` 建立選單
-5. 使用者就能在後台看到外掛的入口
+4. 使用 `add_menu_page()` 建立主選單
+5. 使用 `add_submenu_page()` 建立子選單
+6. 使用者就能在後台看到外掛入口
 
 ## 相關函式說明
 
 ### `add_menu_page()`
 
-這個函式用來建立主選單。
+這個函式用來建立主選單，讓外掛有一個專屬的管理入口。
 
-它通常會接收這幾個參數：
+目前的實作是：
 
-- 頁面標題 $page_title string required
-- 選單名稱 $menu_title string required
-- 權限 $capability string required
-- 選單 slug $menu_slug string required
-- 點擊後要顯示的頁面函式 $function callable optional
-- 圖示 $icon_url string optional
-- 排列順序 $position int|float optional
+```php
+add_menu_page(
+    'Develop Plugin',
+    'Develop 外掛學習',
+    'manage_options',
+    'develop-plugin',
+    'develop_render_admin_page',
+    'dashicons-welcome-learn-more',
+    20
+);
+```
+
+這段程式碼會在後台建立一個主選單，點擊後會顯示 `develop_render_admin_page()` 的內容。
 
 ### `add_submenu_page()`
 
-這個函式用來建立子選單。
-它通常用來把外掛的相關設定頁面掛在主選單之下。
-它通常會接收這幾個參數：
+這個函式用來建立子選單，通常是把設定頁掛在主選單底下。
 
-- 主選單 slug $parent_slug string required
-- 頁面標題 $page_title string required
-- 選單名稱 $menu_title string required
-- 權限 $capability string required
-- 選單 slug $menu_slug string required
-- 點擊後要顯示的頁面函式 $function callable optional
+目前的實作是：
+
+```php
+add_submenu_page(
+    'develop-plugin',
+    'Develop Plugin 設定',
+    '設定',
+    'manage_options',
+    'develop-plugin-settings',
+    'develop_render_settings_page'
+);
+```
+
+這段程式碼會在主選單之下新增一個「設定」子選單，點擊後會顯示設定頁。
 
 ## 這個 hook 的學習重點
 
-- `add_action()` 用來把自己的函式掛到 WordPress 的事件流程中
-- `admin_menu` 是管理後台選單建立時的事件點
-- 透過這個 hook，外掛可以在後台自動註冊入口
+- `add_action()` 用來把自訂函式掛到 WordPress 的流程中
+- `admin_menu` 是建立後台選單的關鍵 hook
+- 透過這個 hook，外掛可以在管理後台自動加入自己的入口
+- 在目前專案中，這個流程已經和設定頁、管理頁面一起整理在管理檔案中
 
 ## 在這個專案中的實際範例
 
@@ -77,6 +103,6 @@ add_submenu_page(...);
 
 ## 小結
 
-`admin_menu` hook 是 WordPress plugin 開發中非常常見的入口點。
+`admin_menu` hook 是 WordPress 外掛開發中非常常見的入口點。
 
-它讓外掛能夠在管理後台中加入自己的選單與頁面，這是建立後台功能的第一步。
+在目前這個專案中，它已經和管理頁面、設定頁、後台資源載入一起，整理在 [inc/admin.php](../inc/admin.php) 中，讓外掛的後台功能更清楚地分層管理。
